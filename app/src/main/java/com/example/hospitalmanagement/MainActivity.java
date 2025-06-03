@@ -7,6 +7,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -39,9 +43,11 @@ public class MainActivity extends AppCompatActivity {
 
     // UI Elements
     private CardView loginCard, patientCard;
-    private TextInputEditText emailField, passwordField;
+    private TextInputEditText emailField, passwordField, confirmPasswordField;
+    private TextInputLayout confirmPasswordLayout;
     private ProgressBar progressBar;
-    private Button loginBtn, registerBtn, logoutBtn, addPatientBtn, viewPatientsBtn;
+    private Button loginBtn, registerBtn, cancelBtn, logoutBtn, addPatientBtn, viewPatientsBtn;
+    private TextView formTitle;
 
     // Patient fields
     private TextInputEditText patientName, patientId, patientEmail, patientAge, patientDisease;
@@ -51,6 +57,9 @@ public class MainActivity extends AppCompatActivity {
     // Patient data
     private PatientAdapter patientAdapter;
     private List<Patient> patientList = new ArrayList<>();
+
+    // Track registration state
+    private boolean isRegistering = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +77,9 @@ public class MainActivity extends AppCompatActivity {
         // Set button listeners
         setButtonListeners();
 
+        // Add password matching validation
+        setupPasswordValidation();
+
         // Check if user is already logged in
         checkCurrentUser();
     }
@@ -78,9 +90,13 @@ public class MainActivity extends AppCompatActivity {
         patientCard = findViewById(R.id.patientCard);
         emailField = findViewById(R.id.emailField);
         passwordField = findViewById(R.id.passwordField);
+        confirmPasswordField = findViewById(R.id.confirmPasswordField);
+        confirmPasswordLayout = findViewById(R.id.confirmPasswordLayout);
         progressBar = findViewById(R.id.progressBar);
         loginBtn = findViewById(R.id.loginBtn);
         registerBtn = findViewById(R.id.registerBtn);
+        cancelBtn = findViewById(R.id.cancelBtn);
+        formTitle = findViewById(R.id.formTitle);
 
         // Patient management UI
         logoutBtn = findViewById(R.id.logoutBtn);
@@ -106,13 +122,92 @@ public class MainActivity extends AppCompatActivity {
 
     private void setButtonListeners() {
         // Authentication buttons
-        loginBtn.setOnClickListener(v -> loginUser());
-        registerBtn.setOnClickListener(v -> registerUser());
-        logoutBtn.setOnClickListener(v -> logoutUser());
+        loginBtn.setOnClickListener(v -> {
+            if (isRegistering) {
+                cancelRegistration();
+            } else {
+                loginUser();
+            }
+        });
+
+        registerBtn.setOnClickListener(v -> {
+            if (isRegistering) {
+                registerUser();
+            } else {
+                showRegistrationForm();
+            }
+        });
+
+        cancelBtn.setOnClickListener(v -> cancelRegistration());
 
         // Patient management buttons
+        logoutBtn.setOnClickListener(v -> logoutUser());
         addPatientBtn.setOnClickListener(v -> addPatient());
         viewPatientsBtn.setOnClickListener(v -> togglePatientRecords());
+    }
+
+    private void setupPasswordValidation() {
+        // Add text watcher for real-time password matching validation
+        TextWatcher passwordWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                validatePasswordMatch();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        };
+
+        passwordField.addTextChangedListener(passwordWatcher);
+        confirmPasswordField.addTextChangedListener(passwordWatcher);
+    }
+
+    private void validatePasswordMatch() {
+        String password = passwordField.getText().toString().trim();
+        String confirmPassword = confirmPasswordField.getText().toString().trim();
+
+        if (!password.isEmpty() && !confirmPassword.isEmpty()) {
+            if (!password.equals(confirmPassword)) {
+                confirmPasswordLayout.setError("Passwords do not match");
+            } else {
+                confirmPasswordLayout.setError(null);
+            }
+        } else {
+            confirmPasswordLayout.setError(null);
+        }
+    }
+
+    private boolean passwordsMatch() {
+        String password = passwordField.getText().toString().trim();
+        String confirmPassword = confirmPasswordField.getText().toString().trim();
+        return password.equals(confirmPassword);
+    }
+
+    private void showRegistrationForm() {
+        isRegistering = true;
+        confirmPasswordLayout.setVisibility(View.VISIBLE);
+        cancelBtn.setVisibility(View.VISIBLE);
+        registerBtn.setText("Create Account");
+        loginBtn.setText("Cancel");
+        formTitle.setText("Create Admin Account");
+    }
+
+    private void cancelRegistration() {
+        isRegistering = false;
+        confirmPasswordLayout.setVisibility(View.GONE);
+        cancelBtn.setVisibility(View.GONE);
+        registerBtn.setText("Register");
+        loginBtn.setText("Login");
+        formTitle.setText("Hospital Admin Portal");
+        confirmPasswordLayout.setError(null);
+
+        // Clear fields
+        emailField.setText("");
+        passwordField.setText("");
+        confirmPasswordField.setText("");
     }
 
     private void checkCurrentUser() {
@@ -129,6 +224,7 @@ public class MainActivity extends AppCompatActivity {
     private void showLoginForm() {
         loginCard.setVisibility(View.VISIBLE);
         patientCard.setVisibility(View.GONE);
+        cancelRegistration(); // Reset form state
     }
 
     private void showPatientManagement() {
@@ -150,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
         String email = emailField.getText().toString().trim();
         String password = passwordField.getText().toString().trim();
 
-        if (email.isEmpty() || password.isEmpty()) {
+        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -173,9 +269,22 @@ public class MainActivity extends AppCompatActivity {
     private void registerUser() {
         String email = emailField.getText().toString().trim();
         String password = passwordField.getText().toString().trim();
+        String confirmPassword = confirmPasswordField.getText().toString().trim();
 
-        if (email.isEmpty() || password.isEmpty()) {
+        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password) || TextUtils.isEmpty(confirmPassword)) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Validate password match
+        if (!passwordsMatch()) {
+            confirmPasswordLayout.setError("Passwords do not match");
+            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (password.length() < 6) {
+            Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -222,7 +331,8 @@ public class MainActivity extends AppCompatActivity {
         String age = patientAge.getText().toString().trim();
         String disease = patientDisease.getText().toString().trim();
 
-        if (name.isEmpty() || id.isEmpty() || email.isEmpty() || age.isEmpty() || disease.isEmpty()) {
+        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(id) ||
+                TextUtils.isEmpty(email) || TextUtils.isEmpty(age) || TextUtils.isEmpty(disease)) {
             Toast.makeText(this, "Please fill all patient fields", Toast.LENGTH_SHORT).show();
             return;
         }

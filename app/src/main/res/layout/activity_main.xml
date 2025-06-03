@@ -17,7 +17,7 @@
         android:layout_marginBottom="16dp"
         app:cardCornerRadius="16dp"
         app:cardElevation="8dp"
-        app:cardBackgroundColor="@color/white">
+        app:cardBackgroundColor="#FFFFFF">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -25,25 +25,15 @@
             android:orientation="vertical"
             android:padding="24dp">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="MEDCARE HOSPITAL"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="#0D47A1"
-                android:gravity="center"
-                android:layout_marginBottom="16dp"/>
-
-
             <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="400dp"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
                 android:layout_gravity="center"
                 android:src="@drawable/hospital"
                 android:layout_marginBottom="16dp"/>
 
             <TextView
+                android:id="@+id/formTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Hospital Admin Portal"
@@ -53,6 +43,7 @@
                 android:gravity="center"
                 android:layout_marginBottom="16dp"/>
 
+            <!-- Email Field -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -74,10 +65,12 @@
                     android:textColor="#333333"/>
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Password Field -->
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/passwordLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="12dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:boxStrokeColor="#0D47A1"
                 app:hintTextColor="#0D47A1"
@@ -91,6 +84,30 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Password"
+                    android:inputType="textPassword"
+                    android:textColor="#333333"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Confirm Password Field (Initially hidden) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/confirmPasswordLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="#0D47A1"
+                app:hintTextColor="#0D47A1"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/confirmPasswordField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Confirm Password"
                     android:inputType="textPassword"
                     android:textColor="#333333"/>
             </com.google.android.material.textfield.TextInputLayout>
@@ -116,6 +133,19 @@
                 android:textColor="#FFFFFF"
                 android:textAllCaps="false"
                 android:textSize="16sp"
+                android:stateListAnimator="@null"/>
+
+            <Button
+                android:id="@+id/cancelBtn"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="Cancel"
+                android:backgroundTint="#9E9E9E"
+                android:textColor="#FFFFFF"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"
                 android:stateListAnimator="@null"/>
 
             <ProgressBar
