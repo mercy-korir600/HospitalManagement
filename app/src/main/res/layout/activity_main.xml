@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/hospital"
+    android:background="@drawable/bg"
     android:orientation="vertical"
     android:padding="16dp"
     tools:context=".MainActivity">
@@ -25,9 +25,20 @@
             android:orientation="vertical"
             android:padding="24dp">
 
+            <TextView
+                android:id="@+id/Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="MEDCARE HOSPITAL"
+                android:textSize="40sp"
+                android:textStyle="bold"
+                android:textColor="#0D47A1"
+                android:gravity="center"
+                android:layout_marginBottom="16dp"/>
+
             <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
+                android:layout_width="match_parent"
+                android:layout_height="400dp"
                 android:layout_gravity="center"
                 android:src="@drawable/hospital"
                 android:layout_marginBottom="16dp"/>
@@ -74,6 +85,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:boxStrokeColor="#0D47A1"
                 app:hintTextColor="#0D47A1"
+                app:endIconMode="password_toggle"
                 app:boxCornerRadiusBottomStart="8dp"
                 app:boxCornerRadiusBottomEnd="8dp"
                 app:boxCornerRadiusTopStart="8dp"
@@ -98,6 +110,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:boxStrokeColor="#0D47A1"
                 app:hintTextColor="#0D47A1"
+                app:endIconMode="password_toggle"
                 app:boxCornerRadiusBottomStart="8dp"
                 app:boxCornerRadiusBottomEnd="8dp"
                 app:boxCornerRadiusTopStart="8dp"
